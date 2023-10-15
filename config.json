@@ -1,0 +1,25 @@
+{
+    "vlc_executable": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+    "day_of_week": "Sunday",
+    "latency_period": 10,
+    "schedule": [
+        {
+            "title": "First Period Announcement",
+            "description": "This is the first period announcement",
+            "time": "10:30",
+            "file": [
+                "C:\\Users\\user\\Videos\\video1.mp4",
+                "C:\\Users\\user\\Videos\\video2.mp4"
+            ]
+        },
+        {
+            "title": "Second Period Announcement",
+            "description": "This is the second period announcement",
+            "time": "11:30",
+            "file": [
+                "C:\\Users\\user\\Videos\\video3.mp4",
+                "C:\\Users\\user\\Videos\\video4.mp4"
+            ]
+        }
+    ]
+}
