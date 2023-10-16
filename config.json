@@ -1,5 +1,5 @@
 {
-    "vlc_executable": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+    "command": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
     "day_of_week": "Sunday",
     "latency_period": 10,
     "schedule": [
