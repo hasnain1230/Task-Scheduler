@@ -5,20 +5,19 @@
         {
             "title": "First Period Announcement",
             "description": "This is the first period announcement",
-            "time": "4:31",
+            "time": "4:37",
             "args": [
                 "--play-and-exit",
-                "/home/lucidity/Desktop/20230614_221147_434.MP4",
-                "/home/lucidity/Desktop/20230614_221247_435.MP4"
+                "/home/lucidity/Desktop/20230614_221147_434.MP4"
             ]
         },
         {
             "title": "Second Period Announcement",
             "description": "This is the second period announcement",
-            "time": "11:30",
+            "time": "4:38",
             "args": [
-                "C:\\Users\\user\\Videos\\video3.mp4",
-                "C:\\Users\\user\\Videos\\video4.mp4"
+                "--play-and-exit",
+                "/home/lucidity/Desktop/20230614_221247_435.MP4"
             ]
         }
     ]

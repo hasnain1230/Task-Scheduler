@@ -7,7 +7,7 @@ import bisect
 
 
 class Task:
-    days = {
+    days = { # Dictionary to convert day of week to integer
         'monday': 0,
         'tuesday': 1,
         'wednesday': 2,
@@ -83,7 +83,6 @@ def schedule_tasks(scheduler, config_dict):
 def run_tasks(scheduler):
     while True:
         task = scheduler.wait_for_next_task()
-        print(task.args)
         subprocess.run([task.command, *task.args])
 
 
