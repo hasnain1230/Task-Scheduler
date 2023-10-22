@@ -54,6 +54,7 @@ class Scheduler:
     def wait_for_next_task(self):
         next_task = self.tasks.pop(0)  # force variable to be a task
         # datetime now get microseconds
+        print(f"Running Next Task At: {next_task[0]}")
         time.sleep((next_task[1].get_next_datetime() - datetime.datetime.now()).total_seconds())
         # Reschedule task for next week
         next_task[1].next_datetime += datetime.timedelta(days=7)
