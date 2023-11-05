@@ -59,6 +59,9 @@ class Scheduler:
         self.add_task(next_task[1])
         return next_task[1]
 
+    def has_next_task(self):
+        return len(self.tasks) > 0
+
 
 def parse_config(config_file):
     with open(config_file) as f:
@@ -80,7 +83,7 @@ def schedule_tasks(scheduler, config_dict):
 
 
 def run_tasks(scheduler):
-    while True:
+    while scheduler.has_next_task():
         task = scheduler.wait_for_next_task()
         subprocess.run([task.command, *task.args])
 
