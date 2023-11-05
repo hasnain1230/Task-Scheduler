@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 import bisect
+import zoneinfo
 
 import Constants
 import Errors
@@ -26,7 +27,7 @@ class Task:
         self.next_datetime = self.get_next_datetime()
 
     def get_next_datetime(self):
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=zoneinfo.ZoneInfo(Constants.TIMEZONE))
         next_time = datetime.datetime.strptime(self.execution_time,
                                                Constants.TIME_FORMAT).time()  # gets only the time part
         day_gap = (self.days[self.day_of_week] - now.weekday()) % Constants.TOTAL_DAYS_OF_WEEK

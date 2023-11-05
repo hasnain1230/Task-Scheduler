@@ -24,6 +24,8 @@ WINDOWS_PLATFORM = 'nt'
 LINUX_PLATFORM = 'posix'
 MAC_PLATFORM = 'mac'
 
+TIMEZONE = 'America/New_York'
+
 if os.name != WINDOWS_PLATFORM:
     POSIX_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE,
                      signal.SIGQUIT, signal.SIGHUP, signal.SIGTSTP]
