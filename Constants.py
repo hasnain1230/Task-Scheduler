@@ -20,17 +20,23 @@ CONFIG_DICT_SCHEDULE_KEY = 'schedule'
 CONFIG_DICT_TIME_KEY = 'time'
 CONFIG_DICT_ARGS_KEY = 'args'
 
-LOCK_FILE_PATH_WINDOWS = 'C:\\ProgramData\\Scheduler\\.lock'
-LOCK_FILE_PATH_LINUX = '/var/run/scheduler/.lock'
-LOCK_FILE_PATH_MAC = '/var/run/scheduler/.lock'
-LOCK_FILE_GENERIC = '.scheduler.lock'
-
 WINDOWS_PLATFORM = 'nt'
 LINUX_PLATFORM = 'posix'
 MAC_PLATFORM = 'mac'
 
-WINDOWS_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE]
-
 if os.name != WINDOWS_PLATFORM:
     POSIX_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE,
                      signal.SIGQUIT, signal.SIGHUP, signal.SIGTSTP]
+
+    _runtime_dir = os.getenv('XDG_RUNTIME_DIR')
+    if _runtime_dir:
+        LOCK_FILE_PATH_LINUX = os.path.join(_runtime_dir, 'scheduler', '._lock')
+        LOCK_FILE_PATH_MAC = os.path.join(_runtime_dir, 'scheduler', '._lock')
+    else:
+        # Fallback to home directory
+        LOCK_FILE_PATH_LINUX = os.path.join(os.getenv('HOME'), 'scheduler', '._lock')
+        LOCK_FILE_PATH_MAC = os.path.join(os.getenv('HOME'), 'scheduler', '_lock')
+    LOCK_FILE_GENERIC = '.scheduler.lock'
+else:
+    WINDOWS_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE]
+    LOCK_FILE_PATH_WINDOWS = os.path.join(os.getenv('LOCALAPPDATA'), 'Scheduler', '._lock')

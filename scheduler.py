@@ -111,7 +111,9 @@ def handle_lock_file():
         # Get the PID of the process that created the lock file
         with open(lock_file_path, 'r') as f:
             pid = f.read()
-        return False, pid
+
+        print(Errors.PID_FILE_EXISTS.format(pid=pid))
+        sys.exit(1)
 
     os.makedirs(os.path.dirname(lock_file_path), exist_ok=True)
 
@@ -145,11 +147,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     lock_file = handle_lock_file()
-
-    if not lock_file[0]:
-        print(Errors.PID_FILE_EXISTS.format(pid=lock_file[1]))
-        sys.exit(1)
-
     handle_signals(lock_file[2])
 
     main(sys.argv[1:])
