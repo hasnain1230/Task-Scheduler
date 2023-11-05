@@ -1,13 +1,14 @@
+import os
 import signal
 
 DAYS_DICT = {  # Dictionary to convert day of week to integer
-        'monday': 0,
-        'tuesday': 1,
-        'wednesday': 2,
-        'thursday': 3,
-        'friday': 4,
-        'saturday': 5,
-        'sunday': 6
+    'monday': 0,
+    'tuesday': 1,
+    'wednesday': 2,
+    'thursday': 3,
+    'friday': 4,
+    'saturday': 5,
+    'sunday': 6
 }
 
 TOTAL_DAYS_OF_WEEK = 7
@@ -29,5 +30,7 @@ LINUX_PLATFORM = 'posix'
 MAC_PLATFORM = 'mac'
 
 WINDOWS_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE]
-POSIX_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE,
-                 signal.SIGQUIT, signal.SIGHUP, signal.SIGTSTP]
+
+if os.name != WINDOWS_PLATFORM:
+    POSIX_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE,
+                     signal.SIGQUIT, signal.SIGHUP, signal.SIGTSTP]
