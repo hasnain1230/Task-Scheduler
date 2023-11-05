@@ -131,8 +131,8 @@ def make_signal_handler(lock_file_path):
 
 
 def handle_signals(lock_file_path):
-    for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGQUIT, signal.SIGTSTP, signal.SIGABRT, signal.SIGILL,
-                signal.SIGSEGV, signal.SIGFPE]:
+    signals = Constants.WINDOWS_SIGNALS if os.name == Constants.WINDOWS_PLATFORM else Constants.POSIX_SIGNALS
+    for sig in signals:
         signal.signal(sig, make_signal_handler(lock_file_path))
 
 

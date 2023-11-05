@@ -1,3 +1,5 @@
+import signal
+
 DAYS_DICT = {  # Dictionary to convert day of week to integer
         'monday': 0,
         'tuesday': 1,
@@ -25,3 +27,7 @@ LOCK_FILE_GENERIC = '.scheduler.lock'
 WINDOWS_PLATFORM = 'nt'
 LINUX_PLATFORM = 'posix'
 MAC_PLATFORM = 'mac'
+
+WINDOWS_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE]
+POSIX_SIGNALS = [signal.SIGINT, signal.SIGTERM, signal.SIGABRT, signal.SIGILL, signal.SIGSEGV, signal.SIGFPE,
+                 signal.SIGQUIT, signal.SIGHUP, signal.SIGTSTP]
