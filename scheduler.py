@@ -149,4 +149,9 @@ if __name__ == '__main__':
     lock_file = handle_lock_file()
     handle_signals(lock_file[2])
 
-    main(sys.argv[1:])
+    try:
+        main(sys.argv[1:])
+    except Exception as e:
+        print(e)
+        os.remove(lock_file[2])
+        sys.exit(1)
