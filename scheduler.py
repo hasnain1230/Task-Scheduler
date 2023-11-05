@@ -47,7 +47,7 @@ class Scheduler:
 
     def add_task(self, task: Task):
         # bisect insort based on task next_datetime
-        bisect.insort(self.tasks, (task.next_datetime, task))
+        bisect.insort(self.tasks, (task.next_datetime, task))  # insert task into tasks list based on next_datetime
 
     def wait_for_next_task(self):
         next_task = self.tasks.pop(0)  # force variable to be a task
