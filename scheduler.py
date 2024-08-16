@@ -8,6 +8,8 @@ import time
 import bisect
 import zoneinfo
 
+import psutil
+
 import Constants
 import Errors
 
@@ -15,18 +17,21 @@ import Errors
 class Task:
     days = Constants.DAYS_DICT
 
-    def __init__(self, command, day_of_week, execution_time, *args):
+    def __init__(self, command, day_of_week, execution_time, title, description, *args):
         self.command = command
 
-        if day_of_week.lower() not in self.days:
+        if day_of_week.lower() not in self.days: # Check if the day of the week is valid
             raise ValueError(Errors.INVALID_DAY_OF_WEEK.format(day_of_week=day_of_week))
 
         self.day_of_week = day_of_week.lower()
         self.execution_time = execution_time
+        self.title = title
+        self.description = description
         self.args = args
         self.next_datetime = self.get_next_datetime()
 
     def get_next_datetime(self):
+        # This method calculates the next datetime to run the task from now
         now = datetime.datetime.now(tz=zoneinfo.ZoneInfo(Constants.TIMEZONE))
         next_time = datetime.datetime.strptime(self.execution_time,
                                                Constants.TIME_FORMAT).time()  # gets only the time part
@@ -37,9 +42,8 @@ class Task:
             day_gap = Constants.TOTAL_DAYS_OF_WEEK
 
         next_date = now.date() + datetime.timedelta(days=day_gap)
-        next_datetime = datetime.datetime.combine(next_date, next_time)
 
-        return next_datetime
+        return (datetime.datetime.combine(next_date, next_time)).replace(tzinfo=zoneinfo.ZoneInfo(Constants.TIMEZONE))
 
 
 class Scheduler:
@@ -48,53 +52,73 @@ class Scheduler:
 
     def add_task(self, task: Task):
         # bisect insort based on task next_datetime
-        bisect.insort(self.tasks, (task.next_datetime, task))  # insert task into tasks list based on next_datetime
+        # basically, insert into the tasks array, but insert it based on the task datetime order so the top of the list (stack)
+        # is always the next task to run
+        bisect.insort(self.tasks, (task.next_datetime, task))
 
-    def wait_for_next_task(self):
-        next_task = self.tasks.pop(0)  # force variable to be a task
-        # datetime now get microseconds
-        print(f"Running Next Task At: {next_task[0]}")
-        time.sleep((next_task[1].get_next_datetime() - datetime.datetime.now()).total_seconds())
-        # Reschedule task for next week
-        next_task[1].next_datetime += datetime.timedelta(days=Constants.TOTAL_DAYS_OF_WEEK)
-        self.add_task(next_task[1])
-        return next_task[1]
+    def get_next_task(self):
+        if not self.tasks:
+            return None
+
+        now = datetime.datetime.now(tz=zoneinfo.ZoneInfo(Constants.TIMEZONE))
+        next_task = self.tasks[0][1] # Get the next task to run
+
+        while next_task.next_datetime <= now:  # If the next task is in the past, remove it and add it to the end of
+            # the list
+            self.tasks.pop(0)
+            next_task.next_datetime += datetime.timedelta(days=Constants.TOTAL_DAYS_OF_WEEK)
+            self.add_task(next_task) # Add the task to the end of the list
+
+            next_task = self.tasks[0][1]
+
+        return next_task
+
+    def run_tasks(self):
+        while True:
+            next_task = self.get_next_task()
+            if next_task is None:
+                print("No more tasks to run.")
+                break
+
+            now = datetime.datetime.now(tz=zoneinfo.ZoneInfo(Constants.TIMEZONE))
+            time_to_wait = (next_task.next_datetime - now).total_seconds()
+
+            if time_to_wait > 0:
+                print(f"Waiting {time_to_wait} seconds until next task: {next_task.title}")
+                time.sleep(time_to_wait)
+
+            print(f"Running task: {next_task.title}")
+            print(f"Description: {next_task.description}")
+
+            subprocess.run([next_task.command, *next_task.args])
+            next_task.next_datetime += datetime.timedelta(days=Constants.TOTAL_DAYS_OF_WEEK)
+            self.add_task(next_task)
 
     def has_next_task(self):
         return len(self.tasks) > 0
 
 
 def parse_config(config_file):
-    with open(config_file) as f:
-        config = json.load(f)
-
-    return config
+    with open(config_file) as config:
+        return json.load(config)
 
 
 def schedule_tasks(scheduler, config_dict):
-    command = config_dict[Constants.CONFIG_DICT_COMMAND_KEY]
-    day_of_week = config_dict[Constants.CONFIG_DICT_DAY_OF_WEEK_KEY]
-    # latency_period = config_dict['latency_period']
-
-    for task in config_dict[Constants.CONFIG_DICT_SCHEDULE_KEY]:
-        execution_time = task[Constants.CONFIG_DICT_TIME_KEY]
-        args = task[Constants.CONFIG_DICT_ARGS_KEY]
-        t = Task(command, day_of_week, execution_time, *args)
-        scheduler.add_task(t)
-
-
-def run_tasks(scheduler):
-    while scheduler.has_next_task():
-        task = scheduler.wait_for_next_task()
-        subprocess.run([task.command, *task.args])
+    for task in config_dict[Constants.CONFIG_DICT_SCHEDULE_KEY]:  # For every task in the config file
+        scheduler.add_task(Task(task[Constants.CONFIG_DICT_COMMAND_KEY],  # Add the task to the scheduler
+                                task[Constants.CONFIG_DICT_DAY_OF_WEEK_KEY],
+                                task[Constants.CONFIG_DICT_TIME_KEY],
+                                task[Constants.CONFIG_DICT_TITLE_KEY],  # Added title key to the config file
+                                task[Constants.CONFIG_DICT_DESCRIPTION_KEY],  # Added description key to the config file
+                                *task.get(Constants.CONFIG_DICT_ARGS_KEY, [])))
 
 
 def main(args):
-    config_location = args[0]
+    config_location = args[0]  # Command line args
     config_dict = parse_config(config_location)  # Parses JSON into a Python dictionary
     scheduler = Scheduler()  # Initializes a scheduler object
     schedule_tasks(scheduler, config_dict)  # Schedules tasks based on the config file
-    run_tasks(scheduler)  # Run the tasks that were parsed from the config file -- will run every week forever.
+    scheduler.run_tasks()  # Run the tasks that were parsed from the config file -- will run every week forever.
 
 
 def handle_lock_file():
@@ -114,10 +138,19 @@ def handle_lock_file():
     if os.path.exists(lock_file_path):
         # Get the PID of the process that created the lock file
         with open(lock_file_path, 'r') as f:
-            pid = f.read()
+            pid = f.read().strip()
 
-        print(Errors.PID_FILE_EXISTS.format(pid=pid))
-        sys.exit(1)
+        try:
+            pid = int(pid)
+
+            if psutil.pid_exists(pid):
+                print(Errors.PID_FILE_EXISTS.format(pid=pid))
+                sys.exit(1)
+            else:
+                print(Constants.REMOVING_STALE_LOCK_FILE.format(lock_file_path))
+                os.remove(lock_file_path)
+        except ValueError:
+            os.remove(lock_file_path)
 
     os.makedirs(os.path.dirname(lock_file_path), exist_ok=True)
 

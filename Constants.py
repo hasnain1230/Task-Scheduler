@@ -11,6 +11,8 @@ DAYS_DICT = {  # Dictionary to convert day of week to integer
     'sunday': 6
 }
 
+REMOVING_STALE_LOCK_FILE = "Removing stale lock file: {lock_file}"
+
 TOTAL_DAYS_OF_WEEK = 7
 TIME_FORMAT = '%H:%M'
 
@@ -19,6 +21,8 @@ CONFIG_DICT_DAY_OF_WEEK_KEY = 'day_of_week'
 CONFIG_DICT_SCHEDULE_KEY = 'schedule'
 CONFIG_DICT_TIME_KEY = 'time'
 CONFIG_DICT_ARGS_KEY = 'args'
+CONFIG_DICT_TITLE_KEY = 'title'
+CONFIG_DICT_DESCRIPTION_KEY = 'description'
 
 WINDOWS_PLATFORM = 'nt'
 LINUX_PLATFORM = 'posix'
