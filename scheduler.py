@@ -60,16 +60,7 @@ class Scheduler:
         if not self.tasks:
             return None
 
-        now = datetime.datetime.now(tz=zoneinfo.ZoneInfo(Constants.TIMEZONE))
-        next_task = self.tasks[0][1] # Get the next task to run
-
-        while next_task.next_datetime <= now:  # If the next task is in the past, remove it and add it to the end of
-            # the list
-            self.tasks.pop(0)
-            next_task.next_datetime += datetime.timedelta(days=Constants.TOTAL_DAYS_OF_WEEK)
-            self.add_task(next_task) # Add the task to the end of the list
-
-            next_task = self.tasks[0][1]
+        next_task = self.tasks[0][1]  # Get the next task to run
 
         return next_task
 
@@ -93,6 +84,7 @@ class Scheduler:
             subprocess.run([next_task.command, *next_task.args])
             next_task.next_datetime += datetime.timedelta(days=Constants.TOTAL_DAYS_OF_WEEK)
             self.add_task(next_task)
+            self.tasks.pop(0) # Pop the current task from the list
 
     def has_next_task(self):
         return len(self.tasks) > 0
